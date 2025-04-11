@@ -84,13 +84,14 @@ import { usePostStore } from '@/stores/usePostSotre';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const account_name = ref<string>('');
 const authStore = useAuthStore();
 const accountStore = useAccountStore();
 
 const router = useRouter();
+const route = useRoute();
 async function logout() {
   Cookies.remove('refreshToken');
   authStore.logout();
@@ -122,7 +123,13 @@ async function submitNewPost() {
       image_url: newPost.value.image,
     });
 
-    await postStore.fetchPosts();
+    const id = Number(route.params.id);
+
+    if (route.path.startsWith('/profile')) {
+      await postStore.fetchPostsByUserId(id);
+    } else if (route.path === '/home') {
+      await postStore.fetchPosts();
+    }
 
     // 실제 게시물 목록에 바로 반영하려면 여기에 로직 추가 가능
     console.log('✅ 게시물 등록 성공:', response.data);

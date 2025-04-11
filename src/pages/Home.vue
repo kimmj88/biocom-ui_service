@@ -11,7 +11,12 @@
                 <v-img :src="post.userAvatar" />
               </v-avatar>
               <div class="ml-3">
-                <div class="text-subtitle-2 font-weight-medium">{{ post.account.name }}</div>
+                <router-link
+                  :to="`/profile/${post.account.id}`"
+                  class="text-subtitle-2 font-weight-medium"
+                >
+                  {{ post.account.name }}
+                </router-link>
                 <div class="text-caption text-grey-lighten-1">
                   {{ post.created_at.slice(0, 10) }}
                 </div>

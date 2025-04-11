@@ -6,12 +6,12 @@
         <v-avatar size="100">
           <v-img :src="user.avatar" />
         </v-avatar>
-        <div class="text-subtitle-2 mt-2">{{ accountStore.name }}</div>
+        <div class="text-subtitle-2 mt-2">{{ account.name }}</div>
       </v-col>
       <v-col cols="9" class="d-flex align-center">
         <div>
           <div class="d-flex align-center mb-2">
-            <h3 class="mr-4">{{ accountStore.email }}</h3>
+            <h3 class="mr-4">{{ account.email }}</h3>
           </div>
           <div class="d-flex gap-4">
             <span>게시물 {{ posts.length }}</span>
@@ -40,9 +40,10 @@ import { computed, onMounted, ref } from 'vue';
 import { useAccountStore } from '@/stores/useAccountStore';
 import { usePostStore } from '@/stores/usePostSotre';
 import { useRoute } from 'vue-router';
+import { getBaseUrl } from '@/@core/composable/createUrl';
+import axios from 'axios';
 
 const route = useRoute();
-const accountStore = useAccountStore();
 const postStore = usePostStore();
 
 const user = ref({
@@ -54,10 +55,28 @@ const user = ref({
 });
 const loading = ref(true);
 const posts = computed(() => postStore.posts);
-
+const account = ref<{
+  name: string;
+  email: string;
+  department: string;
+}>({
+  name: '',
+  email: '',
+  department: '',
+});
 onMounted(async () => {
-  loading.value = true;
   const id = Number(route.params.id); // path에서 :id 추출
+  debugger;
+  try {
+    const response = await axios.get(`${getBaseUrl('DATA')}/account/find?id=${id}`);
+    account.value = response.data.datas;
+  } catch (error) {
+    console.error('회사 정보 불러오기 실패:', error);
+  }
+
+  debugger;
+  loading.value = true;
+
   if (!isNaN(id)) {
     await postStore.fetchPostsByUserId(id);
   }
