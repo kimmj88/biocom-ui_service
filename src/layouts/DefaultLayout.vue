@@ -43,10 +43,15 @@
             prepend-icon="mdi-plus-box-outline"
             @click="openAddPostDialog"
           />
-          <v-list-item title="Profile" link prepend-icon="mdi-account-circle-outline" />
+          <v-list-item
+            title="Profile"
+            :to="PROFILE_PATH.MODIFY(accountStore.id)"
+            link
+            prepend-icon="mdi-account-circle-outline"
+          />
         </v-list>
       </v-navigation-drawer>
-      <v-main>
+      <v-main class="main-scroll-area">
         <router-view />
       </v-main>
     </v-layout>
@@ -72,6 +77,7 @@
 import { getTokensByRefresh } from '@/@core/composable/commonApis';
 import { getBaseUrl } from '@/@core/composable/createUrl';
 import logo from '@/assets/biocom-logo-transparent-final.png';
+import { PROFILE_PATH } from '@/router/path/type';
 import { useAccountStore } from '@/stores/useAccountStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { usePostStore } from '@/stores/usePostSotre';
@@ -109,7 +115,6 @@ const postStore = usePostStore();
 
 async function submitNewPost() {
   if (!newPost.value.description.trim()) return;
-  debugger;
   try {
     const response = await axios.post(`${getBaseUrl('DATA')}/post/create`, {
       creator_id: accountStore.id,
@@ -153,9 +158,34 @@ onMounted(async () => {
       );
       account_name.value = response.data.datas.result.name;
     } catch (e) {
-      debugger;
       console.error('사용자 정보 요청 실패', e);
     }
   }
 });
 </script>
+
+<style scoped>
+.main-scroll-area {
+  height: 100vh;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  overflow: hidden;
+}
+
+.v-application {
+  height: 100%;
+  overflow: hidden;
+}
+
+.main-scroll-area {
+  height: 100vh;
+  overflow-y: auto;
+  padding: 16px;
+}
+</style>

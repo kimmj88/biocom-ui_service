@@ -1,47 +1,52 @@
 <template>
   <v-container>
     <v-btn color="primary" @click="addPost">Add</v-btn>
-
-    <div v-for="(post, index) in allPosts" :key="index">
-      <v-card class="instagram-card" flat>
-        <!-- 헤더 -->
-        <v-card-title class="d-flex align-center justify-space-between px-3 py-2">
-          <div class="d-flex align-center">
-            <v-avatar size="32">
-              <v-img :src="post.userAvatar" />
-            </v-avatar>
-            <div class="ml-3">
-              <div class="text-subtitle-2 font-weight-medium">{{ post.account.name }}</div>
-              <div class="text-caption text-grey-lighten-1">{{ post.created_at.slice(0, 10) }}</div>
+    <div v-if="!loading && allPosts.length">
+      <div v-for="(post, index) in allPosts" :key="index">
+        <v-card class="instagram-card" flat>
+          <!-- 헤더 -->
+          <v-card-title class="d-flex align-center justify-space-between px-3 py-2">
+            <div class="d-flex align-center">
+              <v-avatar size="32">
+                <v-img :src="post.userAvatar" />
+              </v-avatar>
+              <div class="ml-3">
+                <div class="text-subtitle-2 font-weight-medium">{{ post.account.name }}</div>
+                <div class="text-caption text-grey-lighten-1">
+                  {{ post.created_at.slice(0, 10) }}
+                </div>
+              </div>
             </div>
-          </div>
-          <v-icon size="20">mdi-dots-horizontal</v-icon>
-        </v-card-title>
+            <v-icon size="20">mdi-dots-horizontal</v-icon>
+          </v-card-title>
 
-        <!-- 이미지 -->
-        <v-img :src="post.image_url" height="400" cover />
+          <!-- 이미지 -->
+          <v-img :src="post.image_url" height="400" cover />
 
-        <!-- 액션 -->
-        <v-card-actions class="px-3 py-2">
-          <v-btn icon variant="text"><v-icon>mdi-heart-outline</v-icon></v-btn>
-          <v-btn icon variant="text" @click="openDialog(post)"
-            ><v-icon>mdi-comment-outline</v-icon></v-btn
-          >
-          <v-btn icon variant="text"><v-icon>mdi-share-outline</v-icon></v-btn>
-          <v-spacer />
-          <v-btn icon variant="text"><v-icon>mdi-bookmark-outline</v-icon></v-btn>
-        </v-card-actions>
+          <!-- 액션 -->
+          <v-card-actions class="px-3 py-2">
+            <v-btn icon variant="text"><v-icon>mdi-heart-outline</v-icon></v-btn>
+            <v-btn icon variant="text" @click="openDialog(post)"
+              ><v-icon>mdi-comment-outline</v-icon></v-btn
+            >
+            <v-btn icon variant="text"><v-icon>mdi-share-outline</v-icon></v-btn>
+            <v-spacer />
+            <v-btn icon variant="text"><v-icon>mdi-bookmark-outline</v-icon></v-btn>
+          </v-card-actions>
 
-        <!-- 본문 -->
-        <v-card-text class="px-3 py-0">
-          <!-- <div class="text-subtitle-2 font-weight-medium">{{ post.likes }}명 좋아합니다</div> -->
-          <div class="text-body-2">
-            <!-- <span class="font-weight-medium">{{ post.username }}</span> -->
-            {{ post.description }}
-          </div>
-          <div class="text-caption text-grey">댓글 {{ post.post_comments.length }}개 모두 보기</div>
-        </v-card-text>
-      </v-card>
+          <!-- 본문 -->
+          <v-card-text class="px-3 py-0">
+            <!-- <div class="text-subtitle-2 font-weight-medium">{{ post.likes }}명 좋아합니다</div> -->
+            <div class="text-body-2">
+              <span class="font-weight-medium">{{ post.username }}</span>
+              {{ post.description }}
+            </div>
+            <div class="text-caption text-grey">
+              댓글 {{ post.post_comments.length }}개 모두 보기
+            </div>
+          </v-card-text>
+        </v-card>
+      </div>
     </div>
 
     <v-dialog v-model="commentDialog" max-width="900">
@@ -89,9 +94,15 @@
 <script setup lang="ts">
 import { getBaseUrl } from '@/@core/composable/createUrl';
 import axios from 'axios';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useAccountStore } from '@/stores/useAccountStore';
 import { usePostStore } from '@/stores/usePostSotre';
+import { onBeforeRouteUpdate, useRoute } from 'vue-router';
+
+const route = useRoute();
+
+const postStore = usePostStore();
+const accountStore = useAccountStore();
 
 interface Post {
   username: string;
@@ -111,9 +122,6 @@ interface PostOption {
 }
 
 const posts = ref<Post[]>([]);
-//const allPosts = ref<any[]>([]);
-const allPosts = computed(() => postStore.posts);
-const accountStore = useAccountStore();
 
 function addPost() {
   posts.value.unshift({
@@ -153,10 +161,14 @@ async function submitComment(item: any) {
   }
 }
 
-const postStore = usePostStore();
+const allPosts = computed(() => postStore.posts);
+const loading = ref(true);
 
 onMounted(async () => {
-  postStore.fetchPosts();
+  loading.value = true;
+  postStore.clearPosts();
+  await postStore.fetchPosts(); // fetch가 끝난 후에
+  loading.value = false;
 });
 </script>
 
