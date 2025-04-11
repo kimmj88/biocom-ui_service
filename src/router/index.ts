@@ -30,7 +30,7 @@ const router = createRouter({
     {
       path: '/',
       component: DefaultLayout,
-      children: [{ path: '', component: Home }],
+      children: [{ path: '/home', component: Home }],
     },
   ],
 });
@@ -44,20 +44,20 @@ router.beforeEach(async (to, from, next) => {
   Cookies.remove('accessToken');
   Cookies.remove('idToken');
 
-  // ✅ 로그인 페이지 접근 시
   if (to.path === '/login') {
-    // 리프레시 토큰이 있으면 홈으로 리디렉션 (이미 로그인된 상태)
     if (refreshToken) {
       return next('/');
     }
-    // 로그인 안 되어 있으면 그대로 로그인 페이지 진입
     return next();
   }
 
-  // ✅ 다른 페이지 접근 시 (로그인 페이지가 아닌 경우)
   if (refreshToken && (!accessToken || !idToken)) {
     try {
-      const res = await axios.post(`${getBaseUrl('AUTH')}/auth/refresh-token/microsoft`, { refreshToken }, { withCredentials: true });
+      const res = await axios.post(
+        `${getBaseUrl('AUTH')}/auth/refresh-token/microsoft`,
+        { refreshToken },
+        { withCredentials: true }
+      );
 
       accessToken = res.data.accessToken;
       idToken = res.data.idToken;
