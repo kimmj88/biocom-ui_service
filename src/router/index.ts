@@ -8,6 +8,9 @@
 import { createRouter, createWebHistory } from 'vue-router/auto';
 import { routes } from 'vue-router/auto-routes';
 import Home from '@/pages/Home.vue';
+import Shop from '@/pages/shop.vue';
+import Cart from '@/pages/cart.vue';
+import Payment from '@/pages/paymentComplete.vue';
 import Profile from '@/pages/Profile.vue';
 //DefaultLayout
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
@@ -20,7 +23,7 @@ import Cookies from 'js-cookie';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 import { getBaseUrl } from '@/@core/composable/createUrl';
-import { PROFILE_PATH } from './path/type';
+import { PROFILE_PATH, CART_PATH } from './path/type';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,8 +37,10 @@ const router = createRouter({
       component: DefaultLayout,
       children: [
         { path: '/home', component: Home },
-        //{ path: '/profile', component: Profile },
+        { path: '/shop', component: Shop },
         { path: PROFILE_PATH.MODIFY(':id').slice(1), component: Profile, props: true },
+        { path: CART_PATH.MODIFY(':id').slice(1), component: Cart, props: true },
+        { path: '/payment', component: Payment },
       ],
     },
   ],

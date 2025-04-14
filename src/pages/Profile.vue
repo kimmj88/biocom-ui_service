@@ -66,7 +66,6 @@ const account = ref<{
 });
 onMounted(async () => {
   const id = Number(route.params.id); // path에서 :id 추출
-  debugger;
   try {
     const response = await axios.get(`${getBaseUrl('DATA')}/account/find?id=${id}`);
     account.value = response.data.datas;
@@ -74,7 +73,6 @@ onMounted(async () => {
     console.error('회사 정보 불러오기 실패:', error);
   }
 
-  debugger;
   loading.value = true;
 
   if (!isNaN(id)) {

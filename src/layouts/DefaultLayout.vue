@@ -32,11 +32,9 @@
 
         <v-list nav>
           <v-list-item title="Home" to="/home" link prepend-icon="mdi-home" />
-          <!-- <v-list-item title="Search" link prepend-icon="mdi-magnify" /> -->
-          <!-- <v-list-item title="Explore" link prepend-icon="mdi-compass-outline" /> -->
-          <!-- <v-list-item title="Reels" link prepend-icon="mdi-filmstrip-box-multiple" /> -->
           <v-list-item title="Message" link prepend-icon="mdi-message-text-outline" />
           <v-list-item title="Notifications" link prepend-icon="mdi-heart-outline" />
+
           <v-list-item
             title="Add"
             link
@@ -48,6 +46,13 @@
             :to="PROFILE_PATH.MODIFY(accountStore.id)"
             link
             prepend-icon="mdi-account-circle-outline"
+          />
+          <v-list-item title="Shop" to="/shop" link prepend-icon="mdi-storefront" />
+          <v-list-item
+            title="Cart"
+            :to="CART_PATH.MODIFY(1)"
+            link
+            prepend-icon="mdi-cart-outline"
           />
         </v-list>
       </v-navigation-drawer>
@@ -77,7 +82,7 @@
 import { getTokensByRefresh } from '@/@core/composable/commonApis';
 import { getBaseUrl } from '@/@core/composable/createUrl';
 import logo from '@/assets/biocom-logo-transparent-final.png';
-import { PROFILE_PATH } from '@/router/path/type';
+import { PROFILE_PATH, CART_PATH } from '@/router/path/type';
 import { useAccountStore } from '@/stores/useAccountStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { usePostStore } from '@/stores/usePostSotre';
