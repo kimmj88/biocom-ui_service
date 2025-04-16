@@ -1,40 +1,44 @@
 <template>
   <v-app>
-    <v-container style="background-color: #1e1e2f; min-height: 60px" fluid>
-      <v-row align="center" justify="space-between">
-        <v-col cols="auto">
-          <img :src="logo" alt="로고" style="height: 70px" />
-        </v-col>
-        <!-- 오른쪽 유저메뉴 -->
-        <v-col cols="auto">
-          <v-menu>
-            <template #activator="{ props }">
-              <v-btn v-bind="props" color="primary" variant="text">
-                <v-avatar size="28" class="mr-2">
-                  <v-icon>mdi-account</v-icon>
-                </v-avatar>
-                <span class="text-body-2 font-weight-medium">{{ account_name }}</span>
-                <v-icon right size="18">mdi-chevron-down</v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item title="설정" @click="" />
-              <v-list-item title="로그아웃" @click="logout" />
-            </v-list>
-          </v-menu>
-        </v-col>
-      </v-row>
-    </v-container>
     <v-layout>
-      <v-navigation-drawer :width="251" permanent>
+      <v-app-bar app color="#1e1e2f" flat>
+        <v-container style="background-color: #1e1e2f; min-height: 60px" fluid>
+          <v-row align="center" justify="space-between">
+            <v-col cols="auto">
+              <img :src="logo" alt="로고" style="height: 70px" />
+            </v-col>
+            <v-col cols="auto">
+              <v-menu>
+                <template #activator="{ props }">
+                  <v-btn v-bind="props" color="primary" variant="text">
+                    <v-avatar size="28" class="mr-2">
+                      <v-icon>mdi-account</v-icon>
+                    </v-avatar>
+                    <span class="text-body-2 font-weight-medium">{{ account_name }}</span>
+                    <v-icon right size="18">mdi-chevron-down</v-icon>
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item title="설정" @click="" />
+                  <v-list-item title="로그아웃" @click="logout" />
+                </v-list>
+              </v-menu>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-app-bar>
+      <v-navigation-drawer app :width="220" permanent>
         <v-list-item title="Menu" subtitle="BIOCOM" />
         <v-divider />
-
         <v-list nav>
           <v-list-item title="Home" to="/home" link prepend-icon="mdi-home" />
-          <v-list-item title="Message" link prepend-icon="mdi-message-text-outline" />
+          <v-list-item
+            title="Message"
+            :to="CHAT_PATH.VIEW(accountStore.id)"
+            link
+            prepend-icon="mdi-message-text-outline"
+          />
           <v-list-item title="Notifications" link prepend-icon="mdi-heart-outline" />
-
           <v-list-item
             title="Add"
             link
@@ -56,33 +60,36 @@
           />
         </v-list>
       </v-navigation-drawer>
+
+      <!-- ✅ 2. v-main 안에서 로고 포함한 상단 바 + router-view -->
       <v-main class="main-scroll-area">
+        <!-- 페이지 내용 -->
         <router-view />
       </v-main>
     </v-layout>
+
+    <!-- 게시물 작성 다이얼로그 -->
+    <v-dialog v-model="addPostDialog" max-width="600">
+      <v-card>
+        <v-card-title>새 게시물 만들기</v-card-title>
+        <v-card-text>
+          <v-img :src="newPost.image" height="300" cover class="mb-4" />
+          <v-textarea v-model="newPost.description" label="설명 작성" rows="3" variant="outlined" />
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn color="grey" variant="text" @click="addPostDialog = false">취소</v-btn>
+          <v-btn color="primary" variant="elevated" @click="submitNewPost">공유</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
-
-  <v-dialog v-model="addPostDialog" max-width="600">
-    <v-card>
-      <v-card-title>새 게시물 만들기</v-card-title>
-      <v-card-text>
-        <v-img :src="newPost.image" height="300" cover class="mb-4" />
-
-        <v-textarea v-model="newPost.description" label="설명 작성" rows="3" variant="outlined" />
-      </v-card-text>
-      <v-card-actions class="justify-end">
-        <v-btn color="grey" variant="text" @click="addPostDialog = false">취소</v-btn>
-        <v-btn color="primary" variant="elevated" @click="submitNewPost">공유</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>
 
 <script lang="ts" setup>
 import { getTokensByRefresh } from '@/@core/composable/commonApis';
 import { getBaseUrl } from '@/@core/composable/createUrl';
 import logo from '@/assets/biocom-logo-transparent-final.png';
-import { PROFILE_PATH, CART_PATH } from '@/router/path/type';
+import { PROFILE_PATH, CART_PATH, CHAT_PATH } from '@/router/path/type';
 import { useAccountStore } from '@/stores/useAccountStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { usePostStore } from '@/stores/usePostSotre';
@@ -177,27 +184,26 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.main-scroll-area {
-  height: 100vh;
-  overflow-y: auto;
-  padding: 16px;
-}
-
 html,
 body,
 #app {
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden; /* ✅ 좌우 스크롤 제거 */
 }
 
 .v-application {
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden; /* ✅ Vuetify 애플리케이션 전체에 적용 */
+}
+
+.v-main {
+  overflow-x: hidden; /* ✅ 메인 콘텐츠 영역 좌우 스크롤 제거 */
 }
 
 .main-scroll-area {
-  height: 100vh;
   overflow-y: auto;
   padding: 16px;
+  /* 가로 영역 넘치지 않도록 */
+  overflow-x: hidden;
 }
 </style>
