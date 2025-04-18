@@ -30,7 +30,12 @@
 
           <!-- 액션 -->
           <v-card-actions class="px-3 py-2">
-            <v-btn icon variant="text"><v-icon>mdi-heart-outline</v-icon></v-btn>
+            <v-btn icon variant="text" @click="onClickPostLike(post)">
+              <v-icon :color="post.isLiked ? 'red' : ''">
+                {{ post.isLiked ? 'mdi-heart' : 'mdi-heart-outline' }}
+              </v-icon>
+              {{ post.post_likes.length }}
+            </v-btn>
             <v-btn icon variant="text" @click="openDialog(post)"
               ><v-icon>mdi-comment-outline</v-icon></v-btn
             >
@@ -147,6 +152,33 @@ const selectedPost = ref<any>(null);
 function openDialog(post: any) {
   selectedPost.value = post;
   commentDialog.value = true;
+}
+
+async function onClickPostLike(post: any) {
+  try {
+    // 좋아요 요청
+    await axios.post(`${getBaseUrl('DATA')}/postlike/create`, {
+      account_id: accountStore.id,
+      post_id: post.id,
+    });
+
+    await axios.post(`${getBaseUrl('DATA')}/postlike/Delete`, {
+      account_id: accountStore.id,
+      post_id: post.id,
+    });
+
+    // 서버 응답으로 좋아요 여부 토글
+    post.isLiked = !post.isLiked;
+
+    // post_likes 배열도 업데이트 (예시: 간단히 개수만)
+    if (post.isLiked) {
+      post.post_likes.push({ account_id: accountStore.id });
+    } else {
+      post.post_likes = post.post_likes.filter((like: any) => like.account_id !== accountStore.id);
+    }
+  } catch (error: any) {
+    console.error('좋아요 등록 실패:', error);
+  }
 }
 
 async function submitComment(item: any) {
